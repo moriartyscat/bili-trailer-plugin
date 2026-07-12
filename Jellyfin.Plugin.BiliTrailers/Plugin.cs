@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -7,13 +7,13 @@ using MediaBrowser.Model.Serialization;
 namespace Jellyfin.Plugin.BiliTrailers;
 
 /// <summary>
-/// BiliTrailers plugin: adds B站 (Bilibili) trailer URLs to movies during metadata refresh.
+/// BiliTrailers plugin: adds B绔?(Bilibili) trailer URLs to movies during metadata refresh.
 /// Requires the bili-service companion to be running alongside Jellyfin.
 /// </summary>
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <inheritdoc />
-    public override string Name => "B站 Trailers";
+    public override string Name => "B绔?Trailers";
 
     /// <inheritdoc />
     public override Guid Id => Guid.Parse("a4b2c8d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d");
@@ -40,12 +40,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public string ServiceBaseUrl => Configuration.ServiceBaseUrl;
 
     /// <inheritdoc />
-    public IEnumerable<PageInfo> GetPages()
+    public IEnumerable<PluginPageInfo> GetPages()
     {
-        yield return new PageInfo
+        yield return new PluginPageInfo
         {
-            Name = "B站 Trailers",
-            DisplayName = "B站 Trailers",
+            Name = "B绔?Trailers",
+            DisplayName = "B绔?Trailers",
             EnableInMainMenu = true,
             MenuSection = "server",
             MenuIcon = "ondemand_video",

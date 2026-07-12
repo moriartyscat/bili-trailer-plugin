@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
@@ -9,13 +9,14 @@ using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
+using MediaBrowser.Model.Net;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.BiliTrailers.Providers;
 
 /// <summary>
-/// Metadata provider that attaches B站 trailers to movies.
-/// Runs as a remote metadata provider — Jellyfin calls it during library scan / refresh.
+/// Metadata provider that attaches B绔?trailers to movies.
+/// Runs as a remote metadata provider 鈥?Jellyfin calls it during library scan / refresh.
 /// </summary>
 public class BiliTrailerMetadataProvider : IRemoteMetadataProvider<Movie, MovieInfo>
 {
@@ -34,7 +35,7 @@ public class BiliTrailerMetadataProvider : IRemoteMetadataProvider<Movie, MovieI
     }
 
     /// <inheritdoc />
-    public string Name => "B站 Trailers";
+    public string Name => "B绔?Trailers";
 
     /// <inheritdoc />
     public async Task<MetadataResult<Movie>> GetMetadata(
@@ -53,12 +54,12 @@ public class BiliTrailerMetadataProvider : IRemoteMetadataProvider<Movie, MovieI
         var keyword = year > 0 ? $"{movieName} {year}" : movieName;
 
         _logger.LogInformation(
-            "B站 Trailers: searching for '{Keyword}'", keyword);
+            "B绔?Trailers: searching for '{Keyword}'", keyword);
 
         var trailers = await FetchBiliTrailers(config.ServiceBaseUrl, keyword, cancellationToken);
         if (trailers is null || trailers.Count == 0)
         {
-            _logger.LogDebug("No B站 trailers found for '{Keyword}'", keyword);
+            _logger.LogDebug("No B绔?trailers found for '{Keyword}'", keyword);
             return result;
         }
 
@@ -77,7 +78,7 @@ public class BiliTrailerMetadataProvider : IRemoteMetadataProvider<Movie, MovieI
         result.HasMetadata = true;
 
         _logger.LogInformation(
-            "Attached {Count} B站 trailers to '{Keyword}'", trailers.Count, keyword);
+            "Attached {Count} B绔?trailers to '{Keyword}'", trailers.Count, keyword);
 
         return result;
     }
@@ -87,11 +88,19 @@ public class BiliTrailerMetadataProvider : IRemoteMetadataProvider<Movie, MovieI
         MovieInfo searchInfo,
         CancellationToken cancellationToken)
     {
-        // Not providing alternative search results — we only add trailers.
+        // Not providing alternative search results 鈥?we only add trailers.
         return await Task.FromResult(Array.Empty<RemoteSearchResult>());
     }
 
-    private async Task<List<string>> FetchBiliTrailers(
+    public Task<HttpResponseInfo> GetImageResponse(string url, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new HttpResponseInfo
+        {
+            StatusCode = System.Net.HttpStatusCode.NotFound
+        });
+    }
+
+    (
         string baseUrl,
         string keyword,
         CancellationToken ct)
@@ -127,7 +136,7 @@ public class BiliTrailerMetadataProvider : IRemoteMetadataProvider<Movie, MovieI
         catch (Exception ex)
         {
             _logger.LogWarning(ex,
-                "Failed to fetch B站 trailers for '{Keyword}' from {BaseUrl}",
+                "Failed to fetch B绔?trailers for '{Keyword}' from {BaseUrl}",
                 keyword, baseUrl);
             return null;
         }
