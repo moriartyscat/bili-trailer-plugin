@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>B站 Trailers 配置</title>
+</head>
+<body>
+    <div id="BiliTrailersConfig" class="pluginConfigPage">
+        <div class="pageTitle">B站 Trailers</div>
+
+        <div class="configSection">
+            <div class="sectionTitle">伴生服务地址</div>
+            <p>运行 bili-service 的地址（支持 Docker 网络直连或宿主机 IP）</p>
+            <input
+                is="emby-input"
+                id="serviceBaseUrl"
+                label="bili-service URL:"
+                type="url"
+                value="http://localhost:8686"
+            />
+            <div class="fieldDescription">
+                如果 bili-service 和 Jellyfin 在同一个 Docker 网络：<code>http://bili-service:8686</code>
+                <br />如果 bili-service 在宿主机上：<code>http://192.168.x.x:8686</code>
+            </div>
+        </div>
+
+        <div class="configSection">
+            <div class="sectionTitle">每部电影最大预告数量</div>
+            <input
+                is="emby-input"
+                id="maxTrailersPerMovie"
+                label="最大数量:"
+                type="number"
+                min="1"
+                max="10"
+                value="3"
+            />
+        </div>
+
+        <div class="configSection">
+            <label class="checkboxLabel">
+                <input is="emby-checkbox" id="autoMatch" type="checkbox" checked />
+                <span>自动搜索预告片（刷新元数据时自动匹配 B站）</span>
+            </label>
+        </div>
+
+        <div class="configSection">
+            <h3>登录状态</h3>
+            <p id="loginStatus">未检测</p>
+            <button is="emby-button" id="checkLoginBtn" class="raised" onclick="window.BiliTrailers.checkLogin()">
+                检测登录
+            </button>
+        </div>
+
+        <div class="configSection">
+            <button is="emby-button" id="saveBtn" class="raised button-submit" onclick="window.BiliTrailers.save()">
+                保存
+            </button>
+        </div>
+    </div>
+
+    <script>
+        window.BiliTrailers = {
+            async checkLogin() {
+                const url = document.getElementById('serviceBaseUrl').value;
+                try {
+                    const r = await fetch(url + '/auth/status');
+                    const data = await r.json();
+                    if (data.logged_in) {
+                        document.getElementById('loginStatus').innerHTML =
+                            '✅ 已登录：<strong>' + data.user + '</strong>';
+                    } else {
+                        document.getElementById('loginStatus').innerHTML =
+                            '❌ 未登录 <a href="' + url + '/ui" target="_blank">去登录</a>';
+                    }
+                } catch {
+                    document.getElementById('loginStatus').innerHTML =
+                        '❌ 无法连接到伴生服务';
+                }
+            },
+
+            async save() {
+                const config = {
+                    ServiceBaseUrl: document.getElementById('serviceBaseUrl').value,
+                    MaxTrailersPerMovie: parseInt(document.getElementById('maxTrailersPerMovie').value, 10) || 3,
+                    AutoMatch: document.getElementById('autoMatch').checked,
+                };
+                // Jellyfin Dashboard plugin save pattern
+                if (typeof Dashboard !== 'undefined' && Dashboard.processPluginConfigurationUpdate) {
+                    Dashboard.processPluginConfigurationUpdate(
+                        'B站 Trailers',
+                        'BiliTrailersConfig',
+                        config
+                    );
+                }
+            }
+        };
+
+        // Load current config
+        if (typeof Dashboard !== 'undefined' && Dashboard.getCurrentPluginConfig) {
+            Dashboard.getCurrentPluginConfig('B站 Trailers').then(function(config) {
+                if (config) {
+                    document.getElementById('serviceBaseUrl').value = config.ServiceBaseUrl || 'http://localhost:8686';
+                    document.getElementById('maxTrailersPerMovie').value = config.MaxTrailersPerMovie || 3;
+                    document.getElementById('autoMatch').checked = config.AutoMatch !== false;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+﻿name: "B站 Trailers"
+guid: "0f662066-bd9c-4988-870a-b5ba7347284a"
+version: "1.0.0.0"
+targetAbi: "10.9.0.0"
+framework: "net8.0"
+overview: "从B站搜索并播放电影预告片"
+description: >
+  通过伴生服务从Bilibili搜索电影预告片，
+  使用yt-dlp实时抽取视频流播放，无需下载。
+category: "Metadata"
+owner: "user"
+artifacts:
+- "Jellyfin.Plugin.BiliTrailers.dll"
